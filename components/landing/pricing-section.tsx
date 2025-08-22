@@ -1,31 +1,36 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Check } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check } from "lucide-react";
+import { landingConfig } from "@/lib/landingConfig";
 
 interface PricingTier {
-  id: number
-  name: string
-  price: string
-  period: string
-  description: string
-  features: string[]
-  popular: boolean
-  ctaText: string
+  id: number;
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  popular: boolean;
+  ctaText: string;
+  ctaHref?: string;
 }
 
 interface PricingSectionProps {
-  config: PricingTier[]
+  config: PricingTier[];
+  copy: { title: string; subtitle: string; mostPopularLabel: string };
 }
 
-export function PricingSection({ config }: PricingSectionProps) {
+export function PricingSection({ config, copy }: PricingSectionProps) {
   return (
     <section id="pricing" className="py-20 lg:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="text-center space-y-4 mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold tracking-tight">Simple, Transparent Pricing</h2>
+          <h2 className="text-3xl lg:text-5xl font-bold tracking-tight">
+            {copy.title}
+          </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose the perfect plan for your needs. All plans include a 14-day free trial.
+            {copy.subtitle}
           </p>
         </div>
 
@@ -34,12 +39,14 @@ export function PricingSection({ config }: PricingSectionProps) {
             <Card
               key={tier.id}
               className={`relative border-2 transition-all duration-300 hover:shadow-xl ${
-                tier.popular ? "border-primary shadow-lg sm:scale-105" : "border-border hover:border-primary/50"
+                tier.popular
+                  ? "border-primary shadow-lg sm:scale-105"
+                  : "border-border hover:border-primary/50"
               }`}
             >
               {tier.popular && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">
-                  Most Popular
+                  {copy.mostPopularLabel}
                 </Badge>
               )}
 
@@ -48,9 +55,13 @@ export function PricingSection({ config }: PricingSectionProps) {
                 <div className="space-y-2">
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold">{tier.price}</span>
-                    <span className="text-muted-foreground">/{tier.period}</span>
+                    <span className="text-muted-foreground">
+                      /{tier.period}
+                    </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{tier.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {tier.description}
+                  </p>
                 </div>
               </CardHeader>
 
@@ -64,14 +75,20 @@ export function PricingSection({ config }: PricingSectionProps) {
                   ))}
                 </ul>
 
-                <Button className="w-full" variant={tier.popular ? "default" : "outline"} size="lg">
-                  {tier.ctaText}
-                </Button>
+                <a href={tier.ctaHref || "#pricing"} className="block">
+                  <Button
+                    className="w-full"
+                    variant={tier.popular ? "default" : "outline"}
+                    size="lg"
+                  >
+                    {tier.ctaText}
+                  </Button>
+                </a>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }

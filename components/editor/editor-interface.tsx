@@ -1,98 +1,164 @@
-"use client"
+"use client";
 
-import { useState, useCallback, useEffect } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Eye, Save, Monitor, TabletSmartphone, Smartphone, Undo, Redo, Download, EyeOff } from "lucide-react"
-import Link from "next/link"
-import { landingConfig } from "@/lib/landingConfig"
-import { HeroEditor } from "./hero-editor"
-import { FeaturesEditor } from "./features-editor"
-import { PricingEditor } from "./pricing-editor"
-import { TestimonialsEditor } from "./testimonials-editor"
-import { FooterEditor } from "./footer-editor"
-import { ThemeEditor } from "./theme-editor"
-import { LivePreview } from "./live-preview"
-import { useUndoRedo } from "@/hooks/use-undo-redo"
-import { toast } from "@/hooks/use-toast"
+import { useState, useCallback, useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowLeft,
+  Eye,
+  Save,
+  Monitor,
+  TabletSmartphone,
+  Smartphone,
+  Undo,
+  Redo,
+  Download,
+  EyeOff,
+  Upload,
+} from "lucide-react";
+import Link from "next/link";
+import { landingConfig } from "@/lib/landingConfig";
+import { HeroEditor } from "./hero-editor";
+import { FeaturesEditor } from "./features-editor";
+import { PricingEditor } from "./pricing-editor";
+import { TestimonialsEditor } from "./testimonials-editor";
+import { FooterEditor } from "./footer-editor";
+import { ThemeEditor } from "./theme-editor";
+import { HeaderEditor } from "./header-editor";
+import { CopyEditor } from "./copy-editor";
+import { LivePreview } from "./live-preview";
+import { useUndoRedo } from "@/hooks/use-undo-redo";
+import { toast } from "@/hooks/use-toast";
 
 export function EditorInterface() {
-  const [config, setConfig] = useState(landingConfig)
-  const [activeTab, setActiveTab] = useState("hero")
-  const [previewMode, setPreviewMode] = useState<"desktop" | "tablet" | "mobile">("desktop")
-  const [showPreview, setShowPreview] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [config, setConfig] = useState(landingConfig);
+  const [activeTab, setActiveTab] = useState("hero");
+  const [previewMode, setPreviewMode] = useState<
+    "desktop" | "tablet" | "mobile"
+  >("desktop");
+  const [showPreview, setShowPreview] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const { history, currentIndex, pushToHistory, undo, redo, canUndo, canRedo } = useUndoRedo(config)
+  const { history, currentIndex, pushToHistory, undo, redo, canUndo, canRedo } =
+    useUndoRedo(config);
 
   const updateConfig = useCallback(
     (section: string, data: any) => {
       const newConfig = {
         ...config,
         [section]: data,
-      }
-      setConfig(newConfig)
-      pushToHistory(newConfig)
-      setHasUnsavedChanges(true)
+      };
+      setConfig(newConfig);
+      pushToHistory(newConfig);
+      setHasUnsavedChanges(true);
     },
-    [config, pushToHistory],
-  )
+    [config, pushToHistory]
+  );
 
   const handleUndo = () => {
-    const previousConfig = undo()
+    const previousConfig = undo();
     if (previousConfig) {
-      setConfig(previousConfig)
-      setHasUnsavedChanges(true)
+      setConfig(previousConfig);
+      setHasUnsavedChanges(true);
     }
-  }
+  };
 
   const handleRedo = () => {
-    const nextConfig = redo()
+    const nextConfig = redo();
     if (nextConfig) {
-      setConfig(nextConfig)
-      setHasUnsavedChanges(true)
+      setConfig(nextConfig);
+      setHasUnsavedChanges(true);
     }
-  }
+  };
 
   const handleSave = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setHasUnsavedChanges(false)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setHasUnsavedChanges(false);
+      try {
+        localStorage.setItem("landingSavedConfig", JSON.stringify(config));
+        sessionStorage.setItem("landingPreviewConfig", JSON.stringify(config));
+      } catch (err) {
+        console.log("[v0] Could not persist saved config:", err);
+      }
       toast({
         title: "Changes saved",
         description: "Your landing page has been updated successfully.",
-      })
+      });
     } catch (error) {
       toast({
         title: "Save failed",
-        description: "There was an error saving your changes. Please try again.",
+        description:
+          "There was an error saving your changes. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleExport = () => {
-    const dataStr = JSON.stringify(config, null, 2)
-    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
-    const exportFileDefaultName = "landing-config.json"
+    const dataStr = JSON.stringify(config, null, 2);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const exportFileDefaultName = "landing-config.json";
 
-    const linkElement = document.createElement("a")
-    linkElement.setAttribute("href", dataUri)
-    linkElement.setAttribute("download", exportFileDefaultName)
-    linkElement.click()
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
 
     toast({
       title: "Config exported",
       description: "Your configuration has been downloaded as JSON.",
-    })
-  }
+    });
+  };
+
+  // Import JSON (merge with defaults)
+  const mergeWithDefaults = (incoming: any) => {
+    if (!incoming) return landingConfig as any;
+    return {
+      ...landingConfig,
+      ...incoming,
+      header: {
+        ...(landingConfig as any).header,
+        ...(incoming as any).header,
+      },
+      sections: {
+        ...(landingConfig as any).sections,
+        ...((incoming as any).sections || {}),
+      },
+    } as typeof landingConfig;
+  };
+
+  const handleImport = async (file: File) => {
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const merged = mergeWithDefaults(parsed);
+      setConfig(merged);
+      pushToHistory(merged);
+      setHasUnsavedChanges(true);
+      try {
+        sessionStorage.setItem("landingPreviewConfig", JSON.stringify(merged));
+      } catch {}
+      toast({
+        title: "Config imported",
+        description: "Your JSON was merged and applied.",
+      });
+    } catch (error) {
+      toast({
+        title: "Import failed",
+        description: "Invalid JSON file. Please check and try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -100,29 +166,29 @@ export function EditorInterface() {
       if (e.metaKey || e.ctrlKey) {
         switch (e.key) {
           case "s":
-            e.preventDefault()
-            handleSave()
-            break
+            e.preventDefault();
+            handleSave();
+            break;
           case "z":
             if (e.shiftKey) {
-              e.preventDefault()
-              handleRedo()
+              e.preventDefault();
+              handleRedo();
             } else {
-              e.preventDefault()
-              handleUndo()
+              e.preventDefault();
+              handleUndo();
             }
-            break
+            break;
           case "e":
-            e.preventDefault()
-            setShowPreview(!showPreview)
-            break
+            e.preventDefault();
+            setShowPreview(!showPreview);
+            break;
         }
       }
-    }
+    };
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [showPreview])
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showPreview]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -212,7 +278,11 @@ export function EditorInterface() {
               className="flex items-center gap-2"
               title="Toggle Preview (Ctrl+E)"
             >
-              {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPreview ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
               {showPreview ? "Hide" : "Show"} Preview
             </Button>
 
@@ -226,14 +296,59 @@ export function EditorInterface() {
               Export
             </Button>
 
+            <div className="relative">
+              <input
+                type="file"
+                accept="application/json"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImport(file);
+                  e.currentTarget.value = ""; // allow re-selecting same file
+                }}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                title="Import JSON"
+                aria-label="Import JSON"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 bg-transparent pointer-events-none"
+              >
+                <Upload className="w-4 h-4" />
+                Import
+              </Button>
+            </div>
+
             <Button variant="outline" size="sm" asChild>
-              <Link href="/" target="_blank" className="flex items-center gap-2">
+              <Link
+                href="/?preview=true"
+                target="_blank"
+                className="flex items-center gap-2"
+                onClick={() => {
+                  try {
+                    localStorage.setItem(
+                      "landingPreviewConfig",
+                      JSON.stringify(config)
+                    );
+                  } catch (err) {
+                    console.log(
+                      "[v0] Could not persist preview config before opening full preview:",
+                      err
+                    );
+                  }
+                }}
+              >
                 <Eye className="w-4 h-4" />
                 Full Preview
               </Link>
             </Button>
 
-            <Button size="sm" onClick={handleSave} disabled={isLoading} className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
               <Save className="w-4 h-4" />
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
@@ -244,10 +359,30 @@ export function EditorInterface() {
       {/* Side-by-side layout with editor on left and preview on right */}
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Editor Panel */}
-        <div className={`${showPreview ? "w-1/2" : "w-full"} border-r bg-background overflow-auto`}>
+        <div
+          className={`${
+            showPreview ? "w-1/2" : "w-full"
+          } border-r bg-background overflow-auto`}
+        >
           <div className="p-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-6 sticky top-0 bg-background z-10">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="space-y-6"
+            >
+              <TabsList className="grid w-full grid-cols-8 sticky top-0 bg-background z-10">
+                <TabsTrigger value="header" className="relative">
+                  Header
+                  {activeTab === "header" && (
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="copy" className="relative">
+                  Content
+                  {activeTab === "copy" && (
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                  )}
+                </TabsTrigger>
                 <TabsTrigger value="hero" className="relative">
                   Hero
                   {activeTab === "hero" && (
@@ -285,6 +420,33 @@ export function EditorInterface() {
                   )}
                 </TabsTrigger>
               </TabsList>
+              <TabsContent value="header" className="space-y-6">
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle>Header</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <HeaderEditor
+                      config={config.header}
+                      onChange={(data) => updateConfig("header", data)}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="copy" className="space-y-6">
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle>Section Content</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CopyEditor
+                      config={config.sections}
+                      onChange={(data) => updateConfig("sections", data)}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
               <TabsContent value="hero" className="space-y-6">
                 <Card className="shadow-sm">
@@ -297,7 +459,10 @@ export function EditorInterface() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <HeroEditor config={config.hero} onChange={(data) => updateConfig("hero", data)} />
+                    <HeroEditor
+                      config={config.hero}
+                      onChange={(data) => updateConfig("hero", data)}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -313,7 +478,10 @@ export function EditorInterface() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <FeaturesEditor config={config.features} onChange={(data) => updateConfig("features", data)} />
+                    <FeaturesEditor
+                      config={config.features}
+                      onChange={(data) => updateConfig("features", data)}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -329,7 +497,10 @@ export function EditorInterface() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <PricingEditor config={config.pricing} onChange={(data) => updateConfig("pricing", data)} />
+                    <PricingEditor
+                      config={config.pricing}
+                      onChange={(data) => updateConfig("pricing", data)}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -359,7 +530,10 @@ export function EditorInterface() {
                     <CardTitle>Footer Section</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <FooterEditor config={config.footer} onChange={(data) => updateConfig("footer", data)} />
+                    <FooterEditor
+                      config={config.footer}
+                      onChange={(data) => updateConfig("footer", data)}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -370,7 +544,10 @@ export function EditorInterface() {
                     <CardTitle>Theme Customization</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ThemeEditor config={config.theme} onChange={(data) => updateConfig("theme", data)} />
+                    <ThemeEditor
+                      config={config.theme}
+                      onChange={(data) => updateConfig("theme", data)}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -400,5 +577,5 @@ export function EditorInterface() {
         )}
       </div>
     </div>
-  )
+  );
 }

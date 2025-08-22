@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 
 interface LivePreviewProps {
@@ -17,30 +17,31 @@ export function LivePreview({ config, previewMode }: LivePreviewProps) {
   const getPreviewDimensions = () => {
     switch (previewMode) {
       case "mobile":
-        return { width: 375, height: 812, label: "Mobile (375px)", scale: 1 };
+        return { width: 375, height: 812, label: "Mobile (375px)", scale: 0.9 };
       case "tablet":
         return {
           width: 768,
           height: 1024,
           label: "Tablet (768px)",
-          scale: 0.8,
+          scale: 0.7,
         };
       case "desktop":
       default:
-        return { width: 1200, height: 800, label: "Desktop", scale: 0.65 };
+        return { width: 1200, height: 800, label: "Desktop", scale: 0.7 };
     }
   };
 
   const dimensions = getPreviewDimensions();
 
+  const hasMountedRef = useRef(false);
   useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      // Do not force a reload on initial mount to avoid flicker
+      return;
+    }
     setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIframeKey((prev) => prev + 1); // Force iframe reload
-      setTimeout(() => setIsLoading(false), 500); // Show loading for smooth UX
-    }, 100);
-
-    return () => clearTimeout(timer);
+    setIframeKey((prev) => prev + 1); // Reload only when preview mode actually changes after mount
   }, [previewMode]);
 
   useEffect(() => {
@@ -57,17 +58,16 @@ export function LivePreview({ config, previewMode }: LivePreviewProps) {
     }
   }, [config, iframeKey, isLoading]);
 
-  const getIframeUrl = () => {
+  const iframeUrl = useMemo(() => {
+    if (typeof window === "undefined") return "/?preview=true";
     const baseUrl = window.location.origin;
     const params = new URLSearchParams({
       preview: "true",
       mode: previewMode,
-      // Do NOT include config in the URL to avoid exceeding URL length limits
-      // and to prevent encoding issues with large base64 image data.
-      ts: String(Date.now()), // cache-buster to ensure fresh load when needed
+      v: String(iframeKey), // only change when we intentionally reload
     });
     return `${baseUrl}?${params.toString()}`;
-  };
+  }, [previewMode, iframeKey]);
 
   return (
     <div className="h-full flex flex-col">
@@ -109,7 +109,7 @@ export function LivePreview({ config, previewMode }: LivePreviewProps) {
             key={iframeKey}
             id={`preview-iframe-${iframeKey}`}
             ref={iframeRef}
-            src={getIframeUrl()}
+            src={iframeUrl}
             className="w-full h-full border rounded-lg shadow-lg bg-white"
             style={{
               width: dimensions.width,

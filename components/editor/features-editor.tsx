@@ -1,23 +1,25 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2 } from "lucide-react"
-import { ImageUpload } from "./image-upload"
+"use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Trash2 } from "lucide-react";
+import { ImageUpload } from "./image-upload";
+import { Label as TextLabel } from "@/components/ui/label";
+import { Input as TextInput } from "@/components/ui/input";
 
 interface Feature {
-  id: number
-  title: string
-  description: string
-  icon: string
-  image: string
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  image: string;
 }
 
 interface FeaturesEditorProps {
-  config: Feature[]
-  onChange: (config: Feature[]) => void
+  config: Feature[];
+  onChange: (config: Feature[]) => void;
 }
 
 export function FeaturesEditor({ config, onChange }: FeaturesEditorProps) {
@@ -28,23 +30,35 @@ export function FeaturesEditor({ config, onChange }: FeaturesEditorProps) {
       description: "Feature description",
       icon: "/placeholder.svg?height=64&width=64",
       image: "/placeholder.svg?height=300&width=400",
-    }
-    onChange([...config, newFeature])
-  }
+    };
+    onChange([...config, newFeature]);
+  };
 
-  const updateFeature = (id: number, field: keyof Feature, value: string | number) => {
-    onChange(config.map((feature) => (feature.id === id ? { ...feature, [field]: value } : feature)))
-  }
+  const updateFeature = (
+    id: number,
+    field: keyof Feature,
+    value: string | number
+  ) => {
+    onChange(
+      config.map((feature) =>
+        feature.id === id ? { ...feature, [field]: value } : feature
+      )
+    );
+  };
 
   const removeFeature = (id: number) => {
-    onChange(config.filter((feature) => feature.id !== id))
-  }
+    onChange(config.filter((feature) => feature.id !== id));
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Features ({config.length})</h3>
-        <Button onClick={addFeature} size="sm" className="flex items-center gap-2">
+        <Button
+          onClick={addFeature}
+          size="sm"
+          className="flex items-center gap-2"
+        >
           <Plus className="w-4 h-4" />
           Add Feature
         </Button>
@@ -71,7 +85,9 @@ export function FeaturesEditor({ config, onChange }: FeaturesEditorProps) {
                     <Label>Title</Label>
                     <Input
                       value={feature.title}
-                      onChange={(e) => updateFeature(feature.id, "title", e.target.value)}
+                      onChange={(e) =>
+                        updateFeature(feature.id, "title", e.target.value)
+                      }
                       placeholder="Feature title"
                     />
                   </div>
@@ -80,7 +96,9 @@ export function FeaturesEditor({ config, onChange }: FeaturesEditorProps) {
                     <Label>Description</Label>
                     <Textarea
                       value={feature.description}
-                      onChange={(e) => updateFeature(feature.id, "description", e.target.value)}
+                      onChange={(e) =>
+                        updateFeature(feature.id, "description", e.target.value)
+                      }
                       placeholder="Feature description"
                       rows={3}
                     />
@@ -92,7 +110,9 @@ export function FeaturesEditor({ config, onChange }: FeaturesEditorProps) {
                     <Label>Icon</Label>
                     <ImageUpload
                       value={feature.icon}
-                      onChange={(value) => updateFeature(feature.id, "icon", value)}
+                      onChange={(value) =>
+                        updateFeature(feature.id, "icon", value)
+                      }
                       placeholder="Upload icon or enter URL"
                     />
                   </div>
@@ -101,7 +121,9 @@ export function FeaturesEditor({ config, onChange }: FeaturesEditorProps) {
                     <Label>Image</Label>
                     <ImageUpload
                       value={feature.image}
-                      onChange={(value) => updateFeature(feature.id, "image", value)}
+                      onChange={(value) =>
+                        updateFeature(feature.id, "image", value)
+                      }
                       placeholder="Upload image or enter URL"
                     />
                   </div>
@@ -112,5 +134,5 @@ export function FeaturesEditor({ config, onChange }: FeaturesEditorProps) {
         ))}
       </div>
     </div>
-  )
+  );
 }

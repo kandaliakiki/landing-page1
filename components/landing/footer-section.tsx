@@ -1,30 +1,30 @@
-import Link from "next/link"
+import Link from "next/link";
 
 interface FooterLink {
-  name: string
-  href: string
+  name: string;
+  href: string;
 }
 
 interface SocialLink {
-  name: string
-  href: string
-  icon: string
+  name: string;
+  href: string;
+  icon: string;
 }
 
 interface FooterConfig {
-  companyName: string
-  tagline: string
-  description: string
+  companyName: string;
+  tagline: string;
+  description: string;
   links: {
-    product: FooterLink[]
-    company: FooterLink[]
-    support: FooterLink[]
-  }
-  socialLinks: SocialLink[]
+    product: FooterLink[];
+    company: FooterLink[];
+    support: FooterLink[];
+  };
+  socialLinks: SocialLink[];
 }
 
 interface FooterSectionProps {
-  config: FooterConfig
+  config: FooterConfig;
 }
 
 export function FooterSection({ config }: FooterSectionProps) {
@@ -36,18 +36,24 @@ export function FooterSection({ config }: FooterSectionProps) {
           <div className="lg:col-span-1 space-y-4">
             <div className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">LB</span>
+                <span className="text-primary-foreground font-bold text-sm">
+                  LB
+                </span>
               </div>
               <span className="font-bold text-xl">{config.companyName}</span>
             </div>
             <p className="text-sm font-medium text-primary">{config.tagline}</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">{config.description}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {config.description}
+            </p>
           </div>
 
           {/* Links */}
           <div className="lg:col-span-3 grid sm:grid-cols-3 gap-8">
             <div className="space-y-4">
-              <h4 className="font-semibold">Product</h4>
+              <h4 className="font-semibold">
+                {config.headings?.product || "Product"}
+              </h4>
               <ul className="space-y-2">
                 {config.links.product.map((link) => (
                   <li key={link.name}>
@@ -63,7 +69,9 @@ export function FooterSection({ config }: FooterSectionProps) {
             </div>
 
             <div className="space-y-4">
-              <h4 className="font-semibold">Company</h4>
+              <h4 className="font-semibold">
+                {config.headings?.company || "Company"}
+              </h4>
               <ul className="space-y-2">
                 {config.links.company.map((link) => (
                   <li key={link.name}>
@@ -79,7 +87,9 @@ export function FooterSection({ config }: FooterSectionProps) {
             </div>
 
             <div className="space-y-4">
-              <h4 className="font-semibold">Support</h4>
+              <h4 className="font-semibold">
+                {config.headings?.support || "Support"}
+              </h4>
               <ul className="space-y-2">
                 {config.links.support.map((link) => (
                   <li key={link.name}>
@@ -97,7 +107,9 @@ export function FooterSection({ config }: FooterSectionProps) {
         </div>
 
         <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">© 2024 {config.companyName}. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">
+            © 2024 {config.companyName}. All rights reserved.
+          </p>
           <div className="flex items-center gap-4">
             {config.socialLinks.map((social) => (
               <Link
@@ -113,5 +125,5 @@ export function FooterSection({ config }: FooterSectionProps) {
         </div>
       </div>
     </footer>
-  )
+  );
 }
