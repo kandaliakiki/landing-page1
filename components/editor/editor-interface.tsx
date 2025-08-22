@@ -16,7 +16,6 @@ import {
   Redo,
   Download,
   EyeOff,
-  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { landingConfig } from "@/lib/landingConfig";
@@ -29,6 +28,7 @@ import { ThemeEditor } from "./theme-editor";
 import { HeaderEditor } from "./header-editor";
 import { CopyEditor } from "./copy-editor";
 import { LivePreview } from "./live-preview";
+import JSZip from "jszip";
 import { useUndoRedo } from "@/hooks/use-undo-redo";
 import { toast } from "@/hooks/use-toast";
 
@@ -102,22 +102,122 @@ export function EditorInterface() {
     }
   };
 
-  const handleExport = () => {
-    const dataStr = JSON.stringify(config, null, 2);
-    const dataUri =
-      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-    const exportFileDefaultName = "landing-config.json";
-
-    const linkElement = document.createElement("a");
-    linkElement.setAttribute("href", dataUri);
-    linkElement.setAttribute("download", exportFileDefaultName);
-    linkElement.click();
-
-    toast({
-      title: "Config exported",
-      description: "Your configuration has been downloaded as JSON.",
-    });
+  const publishZip = async () => {
+    try {
+      const base = window.location.origin;
+      // Try hosted (public/site) first, then offline root
+      let prefix = "site";
+      let res = await fetch(`${base}/site/manifest.json`);
+      if (!res.ok) {
+        res = await fetch(`${base}/manifest.json`);
+        prefix = "";
+      }
+      if (!res.ok) throw new Error("manifest not found; run publish:offline");
+      const { files } = await res.json();
+      const zip = new JSZip();
+      for (const rel of files) {
+        if (
+          rel === "manifest.json" ||
+          rel === "editor.html" ||
+          rel.startsWith("editor/")
+        ) {
+          continue;
+        }
+        const url = prefix ? `${base}/${prefix}/${rel}` : `${base}/${rel}`;
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const arr = new Uint8Array(await blob.arrayBuffer());
+        zip.file(rel, arr);
+      }
+      const indexUrl = prefix
+        ? `${base}/${prefix}/index.html`
+        : `${base}/index.html`;
+      let indexText = await fetch(indexUrl).then((r) => r.text());
+      // Ensure the published title is neutral and not the default from base HTML
+      indexText = indexText.replace(
+        /<title>[\s\S]*?<\/title>/i,
+        "<title>Landing Page</title>"
+      );
+      const publishConfig = {
+        ...config,
+        header: {
+          ...(config as any).header,
+          showEditorLink: false,
+        },
+      } as any;
+      const injected = indexText.replace(
+        /<body[^>]*>/i,
+        (m) =>
+          `${m}\n<script>(function(){var cfg=${JSON.stringify(
+            publishConfig
+          )};try{localStorage.setItem('landingSavedConfig',JSON.stringify(cfg));sessionStorage.setItem('landingPreviewConfig',JSON.stringify(cfg));}catch(e){};window.__CONFIG__=cfg;})();<\/script>`
+      );
+      zip.file("index.html", injected);
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "site.zip";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Published", description: "Downloaded site.zip" });
+    } catch (err) {
+      toast({
+        title: "Publish failed",
+        description: (err as any)?.message || "Could not generate ZIP",
+        variant: "destructive",
+      });
+    }
   };
+
+  function escapeHtml(value: string | undefined) {
+    return (value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function aTag(href?: string, label?: string, primary?: boolean) {
+    return `<a class=\"btn ${primary ? "primary" : ""}\" href=\"${
+      href || "#"
+    }\">${escapeHtml(label)}</a>`;
+  }
+
+  function renderStatic(cfg: any) {
+    const header = `<header><div><strong>${escapeHtml(
+      cfg.header?.brandName
+    )}</strong></div>${aTag(
+      cfg.header?.ctaHref,
+      cfg.header?.ctaLabel,
+      true
+    )}</header>`;
+    const hero = `<section><h1>${escapeHtml(
+      cfg.hero?.headline
+    )}</h1><p class=\"muted\">${escapeHtml(cfg.hero?.subheadline)}</p>${aTag(
+      cfg.hero?.ctaPrimaryHref,
+      cfg.hero?.ctaText,
+      true
+    )} ${aTag(cfg.hero?.ctaSecondaryHref, cfg.hero?.ctaSecondary)}</section>`;
+    const tiers = (cfg.pricing || [])
+      .map(
+        (t: any) =>
+          `<div style=\"border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin:12px 0\">` +
+          `<div style=\"font-weight:800\">${escapeHtml(t.name)}</div>` +
+          `<div class=\"muted\">${escapeHtml(t.description)}</div>` +
+          `<div style=\"margin:8px 0;font-weight:800\">${escapeHtml(
+            t.price
+          )} <span class=\"muted\">/${escapeHtml(t.period)}</span></div>` +
+          `${aTag(t.ctaHref, t.ctaText, !!t.popular)}` +
+          `</div>`
+      )
+      .join("");
+    const pricing = `<section><h2>${escapeHtml(
+      cfg.sections?.pricing?.title || "Pricing"
+    )}</h2><p class=\"muted\">${escapeHtml(
+      cfg.sections?.pricing?.subtitle
+    )}</p>${tiers}</section>`;
+    return header + hero + pricing;
+  }
 
   // Import JSON (merge with defaults)
   const mergeWithDefaults = (incoming: any) => {
@@ -289,35 +389,13 @@ export function EditorInterface() {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleExport}
+              onClick={publishZip}
               className="flex items-center gap-2 bg-transparent"
+              title="Publish static ZIP"
             >
               <Download className="w-4 h-4" />
-              Export
+              Publish ZIP
             </Button>
-
-            <div className="relative">
-              <input
-                type="file"
-                accept="application/json"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImport(file);
-                  e.currentTarget.value = ""; // allow re-selecting same file
-                }}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                title="Import JSON"
-                aria-label="Import JSON"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 bg-transparent pointer-events-none"
-              >
-                <Upload className="w-4 h-4" />
-                Import
-              </Button>
-            </div>
 
             <Button variant="outline" size="sm" asChild>
               <Link
@@ -413,12 +491,7 @@ export function EditorInterface() {
                     <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="theme" className="relative">
-                  Theme
-                  {activeTab === "theme" && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-                  )}
-                </TabsTrigger>
+                {/* Theme tab removed per request */}
               </TabsList>
               <TabsContent value="header" className="space-y-6">
                 <Card className="shadow-sm">
@@ -538,19 +611,7 @@ export function EditorInterface() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="theme" className="space-y-6">
-                <Card className="shadow-sm">
-                  <CardHeader className="pb-4">
-                    <CardTitle>Theme Customization</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ThemeEditor
-                      config={config.theme}
-                      onChange={(data) => updateConfig("theme", data)}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
+              {/* Theme content removed */}
             </Tabs>
           </div>
         </div>

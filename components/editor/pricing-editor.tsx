@@ -1,26 +1,27 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, X } from "lucide-react"
+"use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Trash2, X } from "lucide-react";
 
 interface PricingTier {
-  id: number
-  name: string
-  price: string
-  period: string
-  description: string
-  features: string[]
-  popular: boolean
-  ctaText: string
+  id: number;
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  popular: boolean;
+  ctaText: string;
+  ctaHref?: string;
 }
 
 interface PricingEditorProps {
-  config: PricingTier[]
-  onChange: (config: PricingTier[]) => void
+  config: PricingTier[];
+  onChange: (config: PricingTier[]) => void;
 }
 
 export function PricingEditor({ config, onChange }: PricingEditorProps) {
@@ -34,41 +35,51 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
       features: ["Feature 1", "Feature 2"],
       popular: false,
       ctaText: "Get Started",
-    }
-    onChange([...config, newTier])
-  }
+    };
+    onChange([...config, newTier]);
+  };
 
   const updateTier = (id: number, field: keyof PricingTier, value: any) => {
-    onChange(config.map((tier) => (tier.id === id ? { ...tier, [field]: value } : tier)))
-  }
+    onChange(
+      config.map((tier) =>
+        tier.id === id ? { ...tier, [field]: value } : tier
+      )
+    );
+  };
 
   const removeTier = (id: number) => {
-    onChange(config.filter((tier) => tier.id !== id))
-  }
+    onChange(config.filter((tier) => tier.id !== id));
+  };
 
   const addFeature = (tierId: number) => {
-    const tier = config.find((t) => t.id === tierId)
+    const tier = config.find((t) => t.id === tierId);
     if (tier) {
-      updateTier(tierId, "features", [...tier.features, "New Feature"])
+      updateTier(tierId, "features", [...tier.features, "New Feature"]);
     }
-  }
+  };
 
-  const updateFeature = (tierId: number, featureIndex: number, value: string) => {
-    const tier = config.find((t) => t.id === tierId)
+  const updateFeature = (
+    tierId: number,
+    featureIndex: number,
+    value: string
+  ) => {
+    const tier = config.find((t) => t.id === tierId);
     if (tier) {
-      const newFeatures = [...tier.features]
-      newFeatures[featureIndex] = value
-      updateTier(tierId, "features", newFeatures)
+      const newFeatures = [...tier.features];
+      newFeatures[featureIndex] = value;
+      updateTier(tierId, "features", newFeatures);
     }
-  }
+  };
 
   const removeFeature = (tierId: number, featureIndex: number) => {
-    const tier = config.find((t) => t.id === tierId)
+    const tier = config.find((t) => t.id === tierId);
     if (tier) {
-      const newFeatures = tier.features.filter((_, index) => index !== featureIndex)
-      updateTier(tierId, "features", newFeatures)
+      const newFeatures = tier.features.filter(
+        (_, index) => index !== featureIndex
+      );
+      updateTier(tierId, "features", newFeatures);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -101,7 +112,9 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
                     <Label>Plan Name</Label>
                     <Input
                       value={tier.name}
-                      onChange={(e) => updateTier(tier.id, "name", e.target.value)}
+                      onChange={(e) =>
+                        updateTier(tier.id, "name", e.target.value)
+                      }
                       placeholder="Plan name"
                     />
                   </div>
@@ -111,7 +124,9 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
                       <Label>Price</Label>
                       <Input
                         value={tier.price}
-                        onChange={(e) => updateTier(tier.id, "price", e.target.value)}
+                        onChange={(e) =>
+                          updateTier(tier.id, "price", e.target.value)
+                        }
                         placeholder="$19"
                       />
                     </div>
@@ -119,7 +134,9 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
                       <Label>Period</Label>
                       <Input
                         value={tier.period}
-                        onChange={(e) => updateTier(tier.id, "period", e.target.value)}
+                        onChange={(e) =>
+                          updateTier(tier.id, "period", e.target.value)
+                        }
                         placeholder="month"
                       />
                     </div>
@@ -129,7 +146,9 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
                     <Label>Description</Label>
                     <Textarea
                       value={tier.description}
-                      onChange={(e) => updateTier(tier.id, "description", e.target.value)}
+                      onChange={(e) =>
+                        updateTier(tier.id, "description", e.target.value)
+                      }
                       placeholder="Plan description"
                       rows={2}
                     />
@@ -139,8 +158,17 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
                     <Label>CTA Text</Label>
                     <Input
                       value={tier.ctaText}
-                      onChange={(e) => updateTier(tier.id, "ctaText", e.target.value)}
+                      onChange={(e) =>
+                        updateTier(tier.id, "ctaText", e.target.value)
+                      }
                       placeholder="Get Started"
+                    />
+                    <Input
+                      value={tier.ctaHref || ""}
+                      onChange={(e) =>
+                        updateTier(tier.id, "ctaHref", e.target.value)
+                      }
+                      placeholder="#section or https://..."
                     />
                   </div>
 
@@ -148,9 +176,13 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
                     <Checkbox
                       id={`popular-${tier.id}`}
                       checked={tier.popular}
-                      onCheckedChange={(checked) => updateTier(tier.id, "popular", checked)}
+                      onCheckedChange={(checked) =>
+                        updateTier(tier.id, "popular", checked)
+                      }
                     />
-                    <Label htmlFor={`popular-${tier.id}`}>Mark as popular</Label>
+                    <Label htmlFor={`popular-${tier.id}`}>
+                      Mark as popular
+                    </Label>
                   </div>
                 </div>
 
@@ -172,7 +204,9 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
                       <div key={index} className="flex items-center gap-2">
                         <Input
                           value={feature}
-                          onChange={(e) => updateFeature(tier.id, index, e.target.value)}
+                          onChange={(e) =>
+                            updateFeature(tier.id, index, e.target.value)
+                          }
                           placeholder="Feature name"
                           className="flex-1"
                         />
@@ -194,5 +228,5 @@ export function PricingEditor({ config, onChange }: PricingEditorProps) {
         ))}
       </div>
     </div>
-  )
+  );
 }

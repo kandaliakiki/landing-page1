@@ -45,12 +45,40 @@ export function HeroSection({ config }: HeroSectionProps) {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href={config.ctaPrimaryHref || "#pricing"}>
+              <a
+                href={config.ctaPrimaryHref || "#pricing"}
+                target={
+                  config.ctaPrimaryHref &&
+                  config.ctaPrimaryHref.startsWith("http")
+                    ? "_blank"
+                    : undefined
+                }
+                rel={
+                  config.ctaPrimaryHref &&
+                  config.ctaPrimaryHref.startsWith("http")
+                    ? "noopener noreferrer"
+                    : undefined
+                }
+              >
                 <Button size="lg" className="text-lg px-8 py-6">
                   {config.ctaText}
                 </Button>
               </a>
-              <a href={config.ctaSecondaryHref || "#"}>
+              <a
+                href={config.ctaSecondaryHref || "#"}
+                target={
+                  config.ctaSecondaryHref &&
+                  config.ctaSecondaryHref.startsWith("http")
+                    ? "_blank"
+                    : undefined
+                }
+                rel={
+                  config.ctaSecondaryHref &&
+                  config.ctaSecondaryHref.startsWith("http")
+                    ? "noopener noreferrer"
+                    : undefined
+                }
+              >
                 <Button
                   variant="outline"
                   size="lg"

@@ -75,7 +75,20 @@ export function PricingSection({ config, copy }: PricingSectionProps) {
                   ))}
                 </ul>
 
-                <a href={tier.ctaHref || "#pricing"} className="block">
+                <a
+                  href={tier.ctaHref || "#pricing"}
+                  className="block"
+                  target={
+                    tier.ctaHref && tier.ctaHref.startsWith("http")
+                      ? "_blank"
+                      : undefined
+                  }
+                  rel={
+                    tier.ctaHref && tier.ctaHref.startsWith("http")
+                      ? "noopener noreferrer"
+                      : undefined
+                  }
+                >
                   <Button
                     className="w-full"
                     variant={tier.popular ? "default" : "outline"}

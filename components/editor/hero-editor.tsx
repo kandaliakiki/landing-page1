@@ -1,22 +1,24 @@
-"use client"
+"use client";
 
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ImageUpload } from "./image-upload"
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "./image-upload";
 
 interface HeroConfig {
-  headline: string
-  subheadline: string
-  ctaText: string
-  ctaSecondary: string
-  backgroundImage: string
-  heroImage: string
+  headline: string;
+  subheadline: string;
+  ctaText: string;
+  ctaSecondary: string;
+  ctaPrimaryHref?: string;
+  ctaSecondaryHref?: string;
+  backgroundImage: string;
+  heroImage: string;
 }
 
 interface HeroEditorProps {
-  config: HeroConfig
-  onChange: (config: HeroConfig) => void
+  config: HeroConfig;
+  onChange: (config: HeroConfig) => void;
 }
 
 export function HeroEditor({ config, onChange }: HeroEditorProps) {
@@ -24,8 +26,8 @@ export function HeroEditor({ config, onChange }: HeroEditorProps) {
     onChange({
       ...config,
       [field]: value,
-    })
-  }
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -61,6 +63,11 @@ export function HeroEditor({ config, onChange }: HeroEditorProps) {
                 onChange={(e) => updateField("ctaText", e.target.value)}
                 placeholder="Get Started"
               />
+              <Input
+                value={config.ctaPrimaryHref || ""}
+                onChange={(e) => updateField("ctaPrimaryHref", e.target.value)}
+                placeholder="#pricing or https://..."
+              />
             </div>
 
             <div className="space-y-2">
@@ -70,6 +77,13 @@ export function HeroEditor({ config, onChange }: HeroEditorProps) {
                 value={config.ctaSecondary}
                 onChange={(e) => updateField("ctaSecondary", e.target.value)}
                 placeholder="Learn More"
+              />
+              <Input
+                value={config.ctaSecondaryHref || ""}
+                onChange={(e) =>
+                  updateField("ctaSecondaryHref", e.target.value)
+                }
+                placeholder="#section or https://..."
               />
             </div>
           </div>
@@ -96,5 +110,5 @@ export function HeroEditor({ config, onChange }: HeroEditorProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

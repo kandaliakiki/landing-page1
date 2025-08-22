@@ -15,6 +15,7 @@ export interface HeaderConfig {
   brandInitials: string;
   nav: NavItem[];
   ctaLabel: string;
+  ctaHref?: string;
   showEditorLink?: boolean;
 }
 
@@ -51,7 +52,7 @@ export function HeaderEditor({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <div className="space-y-2">
           <Label>Brand Name</Label>
           <Input
@@ -71,6 +72,14 @@ export function HeaderEditor({
           <Input
             value={config.ctaLabel}
             onChange={(e) => updateField("ctaLabel", e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>CTA Link</Label>
+          <Input
+            value={config.ctaHref || ""}
+            onChange={(e) => updateField("ctaHref", e.target.value)}
+            placeholder="#pricing or https://..."
           />
         </div>
       </div>
