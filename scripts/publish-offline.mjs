@@ -116,7 +116,8 @@ async function main() {
   );
 
   // Helper scripts for customers
-  const readme = `Offline usage\n\nStructure:\n- start-windows.bat / start-mac-linux.sh (top level)\n- site/ (all website files inside)\n\nRun locally:\n1) Open this folder in a terminal.\n2) Start a local server:\n   - Node (recommended): npx serve site\n   - Python: cd site && python -m http.server 3000\n3) Open http://localhost:3000/ (landing) and http://localhost:3000/editor.html (editor).\n\nDeploy:\n- Upload the site/ folder contents to any static host (Netlify, GitHub Pages, Cloudflare Pages).\n`;
+  const readme = `To use the landing page builder:\n\n- Install Node.js: https://nodejs.org/en/download\n- Run start-windows.bat (Windows) or start-mac-linux.sh (macOS/Linux) in this folder\n- Open http://localhost:3000/ (or the URL shown in the terminal after you run the script)\n- Edit your landing page in the editor, then click \'Publish ZIP\' when finished\n- Deploy the downloaded ZIP (e.g., on Netlify)\n- Your landing page is ready!\n\nDemo video:\n- https://www.youtube.com/watch?v=LQp74SBSu2Y
+`;
   await write(path.join(DIST_DIR, "README-OFFLINE.txt"), readme);
   const win = `@echo off\ncd /d "%~dp0"\nnpx --yes serve site\n`;
   await write(path.join(DIST_DIR, "start-windows.bat"), win);
